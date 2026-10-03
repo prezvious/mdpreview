@@ -1,211 +1,100 @@
-# mdfor.dev
+# MD Preview
 
-[![CI](https://github.com/ikhattab/md-preview/actions/workflows/ci.yml/badge.svg)](https://github.com/ikhattab/md-preview/actions/workflows/ci.yml)
+[![CI](https://github.com/prezvious/mdpreview/actions/workflows/ci.yml/badge.svg)](https://github.com/prezvious/mdpreview/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Live site](https://img.shields.io/badge/live-mdfor.dev-black)](https://mdfor.dev)
 
-A fast, private markdown editor with live preview that runs entirely in your browser. No accounts, no backend, no tracking: your writing never leaves your device.
+A browser-based Markdown editor with instant preview, local draft recovery, and Markdown, HTML, and PDF export. It uses plain JavaScript and Vite, with no account or backend required. Drafts and settings stay in browser storage; user-selected external links and images can make network requests.
 
-**Try it at [mdfor.dev](https://mdfor.dev).** (`mdfor.work` redirects there.)
+This repository builds on [Ihab Khattab's md-preview](https://github.com/ikhattab/md-preview), the project behind [mdfor.dev](https://mdfor.dev). That upstream deployment is maintained separately from this repository.
 
-https://github.com/user-attachments/assets/2c939b81-dc71-47d6-9a8c-8cd2fbd9ffe4
+## Features and usage
 
-## Contents
+- GitHub Flavored Markdown, syntax highlighting, KaTeX math, Mermaid diagrams, and YAML frontmatter.
+- Autosave, up to 20 recovery versions, cross-tab conflict handling, heading navigation, and find/replace.
+- Local Markdown linting and completion for Markdown and JavaScript, TypeScript, JSON, HTML, CSS, and Python code fences.
+- Citation chips, reviewed import of copied AI responses, and a separate Citation playground.
+- Light/dark appearance, pastel and custom themes, display preferences, mobile layouts, and remote-image blocking.
+- Offline use after installation, with heavy renderers cached after use and a reload prompt for updates.
 
-- [Why mdfor.dev](#why-mdfordev)
-- [Features](#features)
-- [Supported syntax](#supported-syntax)
-- [Privacy and security](#privacy-and-security)
-- [Getting started](#getting-started)
-- [Scripts](#scripts)
-- [Deployment](#deployment)
-- [Architecture](#architecture)
-- [Contributing](#contributing)
-- [License](#license)
+Run the app, type in the editor, and read the live preview beside it. Use **Import** or drag a `.md`, `.markdown`, or `.txt` file into the window; **Export** downloads Markdown or self-contained HTML, or opens the browser's PDF print dialog. **Settings** controls writing, appearance, and privacy preferences. Open `/citation-playground.html` for standalone citation conversion.
 
-## Why mdfor.dev
+Use `Ctrl` on Windows/Linux or `Cmd` on macOS: `O` imports, `S` downloads Markdown, `Space` opens completion, and `\` toggles the editor pane on desktop. See [the usage guide](docs/usage.md) for syntax examples, citations, settings, and privacy details.
 
-- **Private by design.** Everything happens client-side. Content and settings are stored only in your browser's `localStorage`.
-- **Fast to open.** No UI framework, and heavy renderers (syntax highlighting, math, diagrams) load only when your document needs them.
-- **Works offline.** After one visit, the app opens without a network connection, including the renderers you've already used.
-- **Self-contained.** Scripts, styles, and fonts are bundled and served from the same origin. No third-party CDNs.
+## Setup
 
-## Features
-
-### Writing
-
-- Live preview as you type, with GitHub Flavored Markdown and line breaks preserved
-- Line-number gutter and optional scroll sync between editor and preview
-- Built-in markdown linting with a clickable panel that jumps to the offending line
-- Auto-save of your document and preferences (theme, pane width, collapsed editor, scroll sync, linting, remote image blocking)
-- Offline use through a service worker; when a new version is deployed, an **Update available** toast offers a reload instead of swapping code mid-edit
-- A rich starter document that shows off what the editor can render
-
-### Rendering
-
-- Syntax-highlighted code blocks via [highlight.js](https://highlightjs.org/), themed to match light or dark mode
-- Math with [KaTeX](https://katex.org/) and diagrams with [Mermaid](https://mermaid.js.org/)
-- YAML frontmatter at the top of a file shown as a small metadata table, like GitHub
-- Fullscreen viewer for images and diagrams
-- Optional blocking of remote images, with alt-text placeholders and a **Load images** button
-- Mermaid diagram toolbar to view full screen, copy as PNG, or download as PNG
-- All rendered HTML sanitized with [DOMPurify](https://github.com/cure53/DOMPurify)
-
-### Import and export
-
-- Import `.md`, `.markdown`, or `.txt` files with the file picker or by dragging a file onto the editor (you're asked before your current content is replaced)
-- Export as:
-  - **Markdown** (`.md`) source
-  - **HTML**: a self-contained file with embedded styles and optional base64-inlined images
-  - **PDF** through the browser's print dialog (choose "Save as PDF")
-
-### Keyboard shortcuts
-
-Use <kbd>Cmd</kbd> on macOS and <kbd>Ctrl</kbd> on Windows and Linux. Shortcuts are paused while a dialog is open.
-
-| Shortcut               | Action                                                  |
-| ---------------------- | ------------------------------------------------------- |
-| <kbd>Cmd/Ctrl+O</kbd>  | Import a file                                           |
-| <kbd>Cmd/Ctrl+S</kbd>  | Download the document as `.md`                          |
-| <kbd>Cmd/Ctrl+\\</kbd> | Collapse or expand the editor (not available on mobile) |
-
-### Layout
-
-- Resizable split panes (drag the handle, or focus it and use the arrow keys)
-- Collapsible editor for distraction-free reading
-- Light and dark themes
-- Responsive layout with editor/preview tabs on mobile
-
-## Supported syntax
-
-Everything in [GitHub Flavored Markdown](https://github.github.com/gfm/) (tables, task lists, strikethrough, autolinks, fenced code), plus:
-
-````markdown
-Inline math: $E = mc^2$
-
-$$
-\int_0^\infty e^{-x^2}\,dx = \frac{\sqrt{\pi}}{2}
-$$
-
-```mermaid
-graph LR
-  Write --> Preview --> Export
-```
-````
-
-### Lint rules
-
-Linting is off by default; turn it on from the header. The rules follow [markdownlint](https://github.com/DavidAnson/markdownlint) numbering:
-
-| Rule  | Checks for                             |
-| ----- | -------------------------------------- |
-| MD009 | Trailing spaces                        |
-| MD010 | Hard tabs                              |
-| MD012 | Multiple consecutive blank lines       |
-| MD018 | No space after `#` in a heading        |
-| MD022 | Headings not surrounded by blank lines |
-| MD037 | Spaces inside emphasis or bold markers |
-| MD041 | First line isn't a top-level heading   |
-| MD047 | File doesn't end with a newline        |
-
-## Privacy and security
-
-- Your markdown and settings stay on your device. Nothing is sent to a server.
-- The production site ships a strict Content Security Policy (see [`_headers`](_headers)): scripts, fonts, and network connections are limited to the same origin, and the app can't be embedded in frames.
-- Images referenced in your markdown by URL are fetched from those URLs by default, which reveals your IP address to their hosts. Turn on **Block remote images** in the header to stop this: remote images (including ones in raw HTML, inline styles, and Mermaid diagrams) show as placeholders with their alt text, and **Load images** loads them for the current document. Images from the same site and `data:` URLs always load.
-- If `localStorage` is unavailable (for example, in some private browsing modes), the app still works but won't remember your content or settings.
-
-To report a vulnerability, see [SECURITY.md](SECURITY.md).
-
-## Getting started
-
-Prerequisites: Node.js 20.19+ (or 22.12+) and npm.
+Install Node.js 22.12+ (recommended) or Node.js 20.19+ within the 20.x release line, and npm. The exact supported range is in `package.json`.
 
 ```bash
-git clone https://github.com/ikhattab/md-preview.git
-cd md-preview
-npm install
-npm run dev      # Vite dev server at http://localhost:5173
+git clone https://github.com/prezvious/mdpreview.git
+cd mdpreview
+npm ci
+npm run dev
 ```
 
-For a production-like preview:
+Open the URL Vite prints, normally `http://localhost:5173`. The lockfile makes installs reproducible. `.npmrc` disables dependency install scripts, sets a seven-day minimum release age, and saves exact versions when adding packages.
+
+### Configuration and environment variables
+
+No environment variables, API keys, database, or external service credentials are required. App preferences are configured in **Settings** and saved locally; defaults and storage keys are in `lib/constants.js`.
+
+Playwright recognizes the standard `CI` environment variable to enable its CI reporter, retries, and server isolation. Local development needs no `.env` file. If a future integration requires configuration, document the variable names and placeholders in an `.env.example`; `.env` and `.env.*` are ignored, with example files explicitly allowed. Vite's `VITE_*` variables are embedded in browser bundles, so they must never contain secrets. Keep any future server credentials outside this static app.
+
+## Commands and validation
+
+| Command                               | Purpose                                                      |
+| ------------------------------------- | ------------------------------------------------------------ |
+| `npm run dev`                         | Development server with hot reload                           |
+| `npm run build`                       | Build both HTML entry points and static assets into `dist/`  |
+| `npm run preview`                     | Serve `dist/` on port 3000 with `_headers` applied           |
+| `npm run lint`                        | Check JavaScript with ESLint                                 |
+| `npm run format:check`                | Check formatting with Prettier                               |
+| `npm run check`                       | Run lint and formatting checks                               |
+| `npm run lint:fix` / `npm run format` | Apply lint or formatting fixes; review the resulting diff    |
+| `npm run test:e2e`                    | Run the Chromium Playwright suite against a production build |
+
+Before the first browser-test run:
 
 ```bash
+npx playwright install chromium
+npm run check
 npm run build
-npm run preview  # serves ./dist at http://localhost:3000 with the headers from _headers
+npm run test:e2e
 ```
 
-## Scripts
+Playwright builds the app and serves it on port 4173 with the production Content Security Policy. Ensure no stale server is already running there: local runs can reuse an existing server. Tests cover rendering, sanitization, import/export, citations, offline use, draft recovery, lint/completion, themes, and settings. There are no separate unit-test or type-check commands. GitHub Actions runs checks, builds, and browser tests for `main` pushes and pull requests.
 
-| Command                | Description                                          |
-| ---------------------- | ---------------------------------------------------- |
-| `npm run dev`          | Vite dev server with hot reload                      |
-| `npm run build`        | Production build to `dist/`                          |
-| `npm run preview`      | Serve the production build on port 3000              |
-| `npm run lint`         | Run ESLint                                           |
-| `npm run lint:fix`     | Run ESLint with autofix                              |
-| `npm run format`       | Format all files with Prettier                       |
-| `npm run format:check` | Check formatting with Prettier                       |
-| `npm run check`        | Lint and format check (CI runs this, then the build) |
-| `npm run test:e2e`     | Playwright smoke tests against the production build  |
+## Project structure
+
+| Path                                                                         | Purpose                                                   |
+| ---------------------------------------------------------------------------- | --------------------------------------------------------- |
+| `index.html`, `app.js`, `styles.css`                                         | Main editor layout, initialization, and shared styles     |
+| `citation-playground.html`, `lib/citation-*`, `lib/citations.*`              | Citation rendering, import review, and standalone tools   |
+| `lib/preview.js`, `lib/lazy-vendors.js`                                      | Markdown parsing, sanitized rendering, and lazy renderers |
+| `lib/content.js`, `lib/storage.js`, `lib/draft-history.js`                   | Autosave, browser storage, and IndexedDB recovery         |
+| `lib/lint*`, `lib/completion*`, `lib/document-navigation.js`                 | Worker-backed writing tools and navigation                |
+| `lib/settings*`, `lib/theme*`, `lib/palettes*`, `lib/display-preferences.js` | Website appearance and writing preferences                |
+| `sw.js`, `lib/offline.js`, `scripts/service-worker.js`                       | Offline lifecycle and generated build manifest            |
+| `vite.config.js`, `scripts/cloudflare-headers.js`, `_headers`                | Build pipeline and hosting/preview headers                |
+| `tests/e2e/`, `playwright.config.js`                                         | Browser tests and production preview configuration        |
+| `docs/usage.md`, `docs/superpowers/`                                         | User guide and feature design records                     |
+
+Main dependencies include Marked and its extensions, DOMPurify, highlight.js, KaTeX, Mermaid, markdownlint, Lezer parsers, Turndown, Lucide, and self-hosted Fontsource fonts. Heavy renderers load on demand; no third-party CDN is needed. `package-lock.json` records exact dependency versions.
 
 ## Deployment
 
-Pushes to `main` deploy automatically to **Cloudflare Pages** (the `md-preview` project), served at [mdfor.dev](https://mdfor.dev):
+```bash
+npm run build
+npm run preview
+```
 
-- Build command: `npm run build`
-- Output directory: `dist`
+Publish the contents of `dist/` to a static host. For Cloudflare Pages, use `npm run build` as the build command and `dist` as the output directory. Configure hosting for this repository separately; connecting Git alone does not configure an automatic deployment.
 
-The output is a plain static site, so any static host works (Netlify, S3, nginx, and so on): run `npm run build` and serve `dist/`. [`_headers`](_headers) sets long-lived caching for hashed assets and the Content Security Policy on hosts that support that file format; on other hosts, configure the equivalent headers yourself. Serve `/sw.js` with `Cache-Control: no-cache` (not the long-lived rules), or returning users won't see new versions promptly.
+`_headers` defines the Content Security Policy and caching rules for hosts that support that format; configure equivalent response headers on other hosts. Serve `/sw.js` with `Cache-Control: no-cache`. Offline installation requires HTTPS or localhost. The build assumes deployment at the origin root, including `/citation-playground.html` and `/sw.js`.
 
-## Architecture
+Website themes and display preferences are separate from exported and printed document styling. Preserve sanitization, security headers, and local draft storage when changing the app.
 
-Plain HTML, CSS, and ES modules, bundled and code-split by [Vite](https://vite.dev/). Markdown is parsed by [marked](https://marked.js.org/) with `marked-highlight` and `marked-katex-extension`; icons come from [Lucide](https://lucide.dev/), and fonts are self-hosted via [Fontsource](https://fontsource.org/).
+## Contributing and license
 
-<details>
-<summary>Project structure</summary>
+See [CONTRIBUTING.md](CONTRIBUTING.md) for conventions and checks, [AGENTS.md](AGENTS.md) for coding-agent guidance, and [SECURITY.md](SECURITY.md) for private vulnerability reporting. Report ordinary bugs through [GitHub issues](https://github.com/prezvious/mdpreview/issues/new/choose).
 
-| Path                            | Purpose                                                  |
-| ------------------------------- | -------------------------------------------------------- |
-| `index.html`                    | Layout and entry point                                   |
-| `app.js`                        | Initialization and event wiring                          |
-| `styles.css`                    | Theming, layout, and responsive styles                   |
-| `lib/constants.js`              | Shared constants and the starter document                |
-| `lib/dom.js`                    | DOM element references                                   |
-| `lib/storage.js`                | `localStorage` helpers                                   |
-| `lib/utils.js`                  | Debounce, throttle, and string helpers                   |
-| `lib/preview.js`                | Markdown parsing, sanitization, Mermaid, preview updates |
-| `lib/frontmatter.js`            | YAML frontmatter detection and metadata table            |
-| `lib/gutter.js`                 | Line-number gutter                                       |
-| `lib/lint.js`                   | Lint rules and panel UI                                  |
-| `lib/theme.js`                  | Theme loading and toggling                               |
-| `lib/layout.js`                 | Resize, collapse, mobile view, scroll sync               |
-| `lib/header-menu.js`            | Mobile overflow menu for the header controls             |
-| `lib/content.js`                | Auto-save and content loading                            |
-| `lib/import-export.js`          | Import and Markdown/HTML/PDF export                      |
-| `lib/lazy-vendors.js`           | Lazy loading for highlight.js, KaTeX, and Mermaid        |
-| `lib/offline.js`                | Service worker registration and the update prompt        |
-| `lib/media-viewer.js`           | Fullscreen image and diagram viewer                      |
-| `lib/remote-images.js`          | Remote image blocking and placeholders                   |
-| `lib/icons.js`                  | Lucide icon helpers                                      |
-| `lib/tooltip.js`                | Viewport-aware tooltips                                  |
-| `lib/fonts.js`                  | Self-hosted font imports                                 |
-| `sw.js`                         | Service worker for offline use                           |
-| `vite.config.js`                | Build configuration                                      |
-| `scripts/cloudflare-headers.js` | Applies `_headers` in `vite preview`                     |
-| `scripts/service-worker.js`     | Emits `sw.js` with the build's file lists                |
-| `scripts/og-image.html`         | Source page for the social preview image                 |
-| `_headers`                      | Cache and security headers for static hosting            |
-| `site.webmanifest`              | Web app manifest                                         |
-
-</details>
-
-## Contributing
-
-Contributions are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) for setup and guidelines. In short: keep the app private (no network requests or CDNs), lazy-load anything heavy, sanitize rendered HTML, and run `npm run check && npm run build` before opening a pull request. CI runs the same checks on every PR.
-
-Found a bug or have an idea? [Open an issue](https://github.com/ikhattab/md-preview/issues/new/choose).
-
-## License
-
-[MIT](LICENSE) © Ihab Khattab
+[MIT](LICENSE), with the original copyright and attribution retained.

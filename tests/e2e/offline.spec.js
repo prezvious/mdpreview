@@ -1,7 +1,11 @@
+import { togglePreference } from './settings-helpers.js';
 import { readFile } from 'node:fs/promises';
 import { test, expect } from '@playwright/test';
+import { serviceWorker } from '../../scripts/service-worker.js';
 
-const fixture = await readFile(new URL('./fixtures/kitchen-sink.md', import.meta.url), 'utf8');
+const fixture = (
+  await readFile(new URL('./fixtures/kitchen-sink.md', import.meta.url), 'utf8')
+).replace(/\r\n/g, '\n');
 
 let errors = [];
 
@@ -70,6 +74,35 @@ test('opens offline after one visit, including highlighting, math, and diagrams'
   await expect(preview.locator('.mermaid > svg')).toContainText('Start');
 });
 
+test('lint and all six code completion languages work offline after one visit', async ({
+  page,
+  context,
+}) => {
+  await page.goto('/');
+  await page.locator('#editor').fill('```js\nconst ready = true;\n```');
+  await expect(page.locator('#preview pre code.language-js .hljs-keyword')).toHaveText('const');
+  await waitForControl(page);
+  await expect.poll(() => uncachedBuiltFiles(page)).toEqual([]);
+  await context.setOffline(true);
+  await page.reload();
+  const editor = page.locator('#editor');
+  for (const [language, body, expected] of [
+    ['js', 'const apple = 1;\napp', 'apple'],
+    ['ts', 'interface Thing {}\nThi', 'Thing'],
+    ['py', 'count = 1\nco', 'count'],
+    ['json', '{"apple": 1, "ap', 'apple'],
+    ['html', '<section></section>\n<se', 'section'],
+    ['css', '.box { color: red; }\n.box { col', 'color'],
+  ]) {
+    await editor.fill(`\`\`\`${language}\n${body}`);
+    await editor.press('Control+Space');
+    await expect(page.getByRole('option', { name: new RegExp(expected) })).toBeVisible();
+  }
+  await togglePreference(page, '#lintToggle');
+  await editor.fill('#Title\nBody');
+  await expect(page.locator('#lintList .lint-item-message').first()).toContainText('MD018');
+});
+
 test('offers a reload when a new version is ready, then switches over', async ({ page }) => {
   await page.goto('/');
   await waitForControl(page);
@@ -121,9 +154,14 @@ test('precaches what the app needs to start', async () => {
   const stylesheet = html.match(/<link rel="stylesheet"[^>]+href="([^"]+)"/)[1];
   expect(precache).toEqual(expect.arrayContaining([entry, stylesheet]));
   expect(precache.some((url) => /\/[^/]+-latin-400-normal\.[^/]+\.woff2$/.test(url))).toBe(true);
+  expect(precache.some((url) => /\/completion-worker-[^/]+\.js$/.test(url))).toBe(true);
+  expect(precache.some((url) => /\/lint-worker-[^/]+\.js$/.test(url))).toBe(true);
 
-  // Fonts only math needs and the big lazy chunks are cached when used, not up front.
-  expect(precache.filter((url) => /KaTeX_|^\/chunks\//.test(url))).toEqual([]);
+  // Shared startup chunks are precached; converters and heavy renderers stay lazy.
+  const lazyAssets = assets.filter((url) => /KaTeX_|turndown|mermaid|katex|elk-/i.test(url));
+  expect(lazyAssets.length).toBeGreaterThan(0);
+  expect(lazyAssets.filter((url) => precache.includes(url))).toEqual([]);
+  expect(precache).toContain('/citation-playground.html');
   expect(assets.some((url) => url.startsWith('/chunks/'))).toBe(true);
   for (const url of new Set([...precache, ...assets])) {
     await expect(readFile(new URL(url.slice(1), dist))).resolves.toBeDefined();
@@ -134,4 +172,26 @@ test('serves the worker without long-lived caching', async ({ request }) => {
   const response = await request.get('/sw.js');
   expect(response.ok()).toBe(true);
   expect(response.headers()['cache-control']).toBe('no-cache');
+});
+
+test('changing only the playground HTML changes the offline cache version', () => {
+  function versionFor(pageSource) {
+    let emitted;
+    serviceWorker().generateBundle.call(
+      {
+        emitFile: (asset) => {
+          emitted = asset;
+        },
+      },
+      {},
+      {
+        'index.html': { type: 'asset', source: '<h1>Editor</h1>' },
+        'citation-playground.html': { type: 'asset', source: pageSource },
+      }
+    );
+    return JSON.parse(emitted.source.match(/const BUILD = (\{.*\});/)[1]).version;
+  }
+  expect(versionFor('<h1>Original playground</h1>')).not.toBe(
+    versionFor('<h1>Updated playground</h1>')
+  );
 });

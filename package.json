@@ -34,10 +34,10 @@
   "homepage": "https://mdfor.dev",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ikhattab/md-preview.git"
+    "url": "git+https://github.com/prezvious/mdpreview.git"
   },
   "bugs": {
-    "url": "https://github.com/ikhattab/md-preview/issues"
+    "url": "https://github.com/prezvious/mdpreview/issues"
   },
   "engines": {
     "node": "^20.19.0 || >=22.12.0"
@@ -46,16 +46,27 @@
     "@fontsource-variable/fraunces": "^5.2.9",
     "@fontsource/hanken-grotesk": "^5.2.8",
     "@fontsource/jetbrains-mono": "^5.2.8",
+    "@lezer/common": "1.5.2",
+    "@lezer/css": "1.3.8",
+    "@lezer/html": "1.3.13",
+    "@lezer/javascript": "1.5.5",
+    "@lezer/json": "1.0.3",
+    "@lezer/markdown": "1.7.2",
+    "@lezer/python": "1.1.19",
     "dompurify": "^3.4.16",
+    "github-slugger": "2.0.0",
     "highlight.js": "^11.11.1",
     "katex": "^0.18.7",
     "lucide": "^1.47.0",
+    "markdownlint": "0.40.0",
     "marked": "^18.0.14",
     "marked-alert": "2.1.2",
     "marked-gfm-heading-id": "4.1.4",
     "marked-highlight": "^2.2.4",
     "marked-katex-extension": "^5.1.13",
-    "mermaid": "^12.0.0"
+    "mermaid": "^12.0.0",
+    "turndown": "7.2.4",
+    "turndown-plugin-gfm": "1.0.2"
   },
   "overrides": {
     "lodash-es": "^4.18.1"

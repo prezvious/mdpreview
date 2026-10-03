@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Paste AI responses, preserve source links, and create custom citation chips locally."
+    />
+    <title>Citation playground — mdfor.dev</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <script type="module" src="/lib/citation-playground.js"></script>
+  </head>
+  <body class="citation-playground">
+    <main class="citation-playground-shell">
+      <header class="citation-playground-header">
+        <div>
+          <h1>Citation playground</h1>
+          <p>
+            Paste an AI response, keep its source links, and turn them into citation chips.
+            Everything stays in your browser.
+          </p>
+        </div>
+        <div class="citation-playground-actions">
+          <a href="/">Open Markdown editor</a>
+          <button id="playgroundTheme" type="button" aria-label="Switch to dark theme">
+            Dark theme
+          </button>
+        </div>
+      </header>
+      <div id="playgroundImport"></div>
+      <details class="citation-source-review citation-manual-source">
+        <summary>Add a custom citation</summary>
+        <form id="playgroundSourceForm" class="citation-add-fields">
+          <label for="playgroundSourceUrl">Source URL</label>
+          <input
+            class="export-dialog-input"
+            id="playgroundSourceUrl"
+            type="url"
+            required
+            placeholder="https://…"
+          />
+          <label for="playgroundSourceLabel">Source label (optional)</label>
+          <input
+            class="export-dialog-input"
+            id="playgroundSourceLabel"
+            type="text"
+            placeholder="Source name"
+          />
+          <label for="playgroundSourceTitle">Article title (optional)</label>
+          <input class="export-dialog-input" id="playgroundSourceTitle" type="text" />
+          <div class="citation-playground-actions">
+            <button type="submit">Insert custom citation</button>
+          </div>
+        </form>
+      </details>
+      <div class="citation-playground-actions">
+        <button id="playgroundCopy" type="button">Copy Markdown</button>
+        <button id="playgroundDownload" type="button">Download .md</button>
+        <button id="playgroundHtml" type="button">Download HTML</button>
+        <button id="playgroundExample" type="button">Try example</button>
+      </div>
+      <p id="playgroundStatus" class="citation-import-status" role="status" aria-live="polite"></p>
+      <p class="citation-import-status">
+        For a new response, select all in the input before pasting. Missing source URLs need to be
+        added manually. <code>[source](https://example.org "cite")</code> creates a chip.
+      </p>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,54 @@
+/* Website palette relationships. Core colors live in palette-data.js. */
+@media screen {
+  :root[data-palette]:not([data-palette='warm-paper']) {
+    --bg-tertiary: color-mix(in srgb, var(--bg-secondary) 88%, var(--text-primary));
+    --text-muted: var(--text-secondary);
+    --border-hover: color-mix(in srgb, var(--border-color) 70%, var(--text-primary));
+    --accent-muted: var(--accent);
+    --accent-glow: color-mix(in srgb, var(--accent) 12%, transparent);
+    --code-bg: var(--bg-secondary);
+    --blockquote-border: var(--accent);
+    --link-color: var(--accent);
+    --selection-bg: var(--highlight-bg);
+    --selection-fg: var(--text-primary);
+  }
+
+  :root[data-palette]:not([data-palette='warm-paper'])[data-theme='dark'] {
+    --accent-glow: color-mix(in srgb, var(--accent) 18%, transparent);
+  }
+
+  :root[data-palette]:not([data-palette='warm-paper']) .editor-pane {
+    background: var(--bg-secondary);
+  }
+
+  :root[data-palette]:not([data-palette='warm-paper']) .preview-pane {
+    background: var(--bg-surface);
+  }
+
+  :root[data-palette]:not([data-palette='warm-paper']) .prose mark,
+  :root[data-palette]:not([data-palette='warm-paper']) .prose blockquote:not(.markdown-alert) {
+    background: var(--highlight-bg);
+    color: var(--text-primary);
+  }
+
+  :root[data-palette]:not([data-palette='warm-paper']) .prose a {
+    text-decoration-color: color-mix(in srgb, var(--link-color) 40%, transparent);
+  }
+
+  :root[data-palette]:not([data-palette='warm-paper']) .prose a:hover {
+    text-decoration-color: var(--link-color);
+  }
+
+  /* Dark pastel accents need dark ink on filled controls. */
+  :root[data-palette]:not([data-palette='warm-paper'])[data-theme='dark']
+    .export-dialog-btn-primary {
+    color: var(--bg-primary);
+  }
+
+  @media (min-width: 769px) {
+    :root[data-palette]:not([data-palette='warm-paper'])[data-theme='dark']
+      .file-action-btn-primary {
+      color: var(--bg-primary);
+    }
+  }
+}

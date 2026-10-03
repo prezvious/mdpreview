@@ -54,10 +54,14 @@ export function serviceWorker() {
       }
 
       const { precache, assets } = collectBuildFiles(bundle);
-      const index = bundle['index.html'];
+      const pages = Object.keys(bundle)
+        .filter((name) => name.endsWith('.html'))
+        .sort()
+        .map((name) => String(bundle[name]?.source ?? ''))
+        .join('\n');
       const version = createHash('sha256')
         .update(source)
-        .update(String(index?.source ?? ''))
+        .update(pages)
         .update(precache.join('\n'))
         .digest('hex')
         .slice(0, 10);

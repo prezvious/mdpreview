@@ -10,6 +10,10 @@ authors:
 
 Some **bold**, _italic_, `inline code` and a [link](https://example.com).
 
+An inline source [eScholarship](https://example.org/paper 'cite: Example paper') and a reference source [nyu][citation-study].
+
+[citation-study]: https://example.edu/study 'cite'
+
 This paragraph is hard-wrapped
 across several lines
 and renders as one line.

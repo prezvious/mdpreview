@@ -7,9 +7,9 @@ Thanks for your interest in improving mdfor.dev! Bug reports, fixes, and focused
 Prerequisites: Node.js 20.19+ (or 22.12+) and npm.
 
 ```bash
-git clone https://github.com/ikhattab/md-preview.git
-cd md-preview
-npm install
+git clone https://github.com/prezvious/mdpreview.git
+cd mdpreview
+npm ci
 npm run dev
 ```
 

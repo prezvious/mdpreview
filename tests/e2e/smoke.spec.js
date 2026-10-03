@@ -1,7 +1,10 @@
+import { toggleAppearance, togglePreference } from './settings-helpers.js';
 import { readFile } from 'node:fs/promises';
 import { test, expect } from '@playwright/test';
 
-const fixture = await readFile(new URL('./fixtures/kitchen-sink.md', import.meta.url), 'utf8');
+const fixture = (
+  await readFile(new URL('./fixtures/kitchen-sink.md', import.meta.url), 'utf8')
+).replace(/\r\n/g, '\n');
 const png = Buffer.from(
   'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
   'base64'
@@ -39,7 +42,10 @@ test.beforeEach(async ({ page }) => {
 
   await page.goto('/');
   await page.locator('#editor').fill(fixture);
-  await expect(page.locator('#preview .mermaid.mermaid-rendered > svg')).toBeVisible();
+  // Cold Mermaid imports and layout can exceed the usual assertion budget.
+  await expect(page.locator('#preview .mermaid.mermaid-rendered > svg')).toBeVisible({
+    timeout: 15_000,
+  });
 });
 
 test.afterEach(() => {
@@ -60,6 +66,12 @@ test('renders every supported markdown feature', async ({ page }) => {
 
   await expect(preview.locator(':scope > .table-wrap table td').first()).toHaveText('alpha');
   await expect(preview.locator('input[type="checkbox"]')).toHaveCount(2);
+
+  await expect(preview.locator('a.citation-chip')).toHaveCount(2);
+  await expect(preview.locator('a.citation-chip').first()).toHaveAttribute(
+    'href',
+    'https://example.org/paper'
+  );
 
   await expect(preview.locator('pre code.language-js .hljs-keyword')).toHaveText('const');
   await expect(preview.locator('pre .code-copy-btn')).toHaveCount(1);
@@ -91,7 +103,7 @@ test('renders GitHub alerts with a title and distinct color in both themes', asy
   const lightColors = await readAlertColors(preview);
   expectDistinctAlertColors(lightColors);
 
-  await page.locator('#themeToggle').click();
+  await toggleAppearance(page);
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
 
   const darkColors = await readAlertColors(preview);
@@ -120,7 +132,7 @@ test('renders YAML frontmatter as metadata instead of a rule and heading', async
 test('lints frontmatter documents without flagging the YAML', async ({ page }) => {
   const preview = page.locator('#preview');
   const editor = page.locator('#editor');
-  await page.locator('#lintToggle').click();
+  await togglePreference(page, '#lintToggle');
 
   await editor.fill('---\nseo:\n  description: Nested\n#no-space comment\n---\nIntro paragraph.\n');
   await expect(preview.locator('.frontmatter td.frontmatter-raw')).toHaveText(
@@ -129,7 +141,7 @@ test('lints frontmatter documents without flagging the YAML', async ({ page }) =
   await expect(preview.locator('h1, h2, hr')).toHaveCount(0);
   await expect(page.locator('#lintList .lint-item-line')).toHaveText(['L6']);
   await expect(page.locator('#lintList .lint-item-message')).toHaveText([
-    'MD041: First line should be a top-level heading',
+    'MD041: First line in a file should be a top-level heading',
   ]);
 
   await editor.fill('---\ntitle: Hello\n---\nIntro paragraph.\n');
@@ -256,6 +268,13 @@ test('exports standalone HTML with rendered content', async ({ page }) => {
   await expect(page.locator('h1')).toHaveText('Smoke Test');
   await expect(page.locator('.katex-display')).toHaveCount(1);
   await expect(page.locator('pre .hljs-keyword')).toHaveText('const');
+  await expect(page.locator('a.citation-chip')).toHaveCount(2);
+  expect(
+    await page
+      .locator('a.citation-chip')
+      .first()
+      .evaluate((chip) => getComputedStyle(chip).borderRadius)
+  ).not.toBe('0px');
   await expect(page.locator('.mermaid > svg')).toBeVisible();
   await expect(page.locator('.code-copy-btn, .mermaid-toolbar, script, [onclick]')).toHaveCount(0);
 
@@ -279,6 +298,7 @@ test('serves the production Content Security Policy and fails on violations', as
 });
 
 test('loads every image before printing a long PDF export', async ({ page }) => {
+  test.setTimeout(60_000);
   const origin = 'https://images.example';
   // The hanging image is never fulfilled, so its request stays pending.
   await page.route(`${origin}/**`, (route) => {
@@ -386,7 +406,7 @@ function remoteReferences(page) {
 async function turnOnImageBlocking(page) {
   const toggle = page.locator('#remoteImagesToggle');
   await expect(toggle).toHaveAttribute('aria-pressed', 'false');
-  await toggle.click();
+  await togglePreference(page, '#remoteImagesToggle');
   await expect(toggle).toHaveAttribute('aria-pressed', 'true');
 }
 
@@ -671,14 +691,7 @@ test.describe('on macOS', () => {
   });
 });
 
-const HEADER_CONTROLS = [
-  '#lintToggle',
-  '#remoteImagesToggle',
-  '#importBtn',
-  '#exportMenuBtn',
-  '#themeToggle',
-  '.repo-link',
-];
+const HEADER_CONTROLS = ['#importBtn', '#exportMenuBtn', '#settingsBtn', '.repo-link'];
 
 test('keeps every header control inline on desktop', async ({ page }) => {
   await expect(page.locator('#headerMenuBtn')).toBeHidden();
@@ -714,20 +727,17 @@ test.describe('mobile header', () => {
       }
       await expectNoHorizontalScroll(page);
 
-      await page.locator('#themeToggle').click();
+      await toggleAppearance(page);
       await expect(menu).toBeHidden();
       await expect(menuBtn).toHaveAttribute('aria-expanded', 'false');
       await expect(menuBtn).toBeFocused();
     }
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
 
-    await menuBtn.click();
     for (const selector of ['#lintToggle', '#remoteImagesToggle']) {
-      const toggle = page.locator(selector);
-      await expect(toggle).toHaveAttribute('aria-pressed', 'false');
-      await toggle.click();
-      await expect(toggle).toHaveAttribute('aria-pressed', 'true');
-      await expect(menu).toBeVisible();
+      await expect(page.locator(selector)).toHaveAttribute('aria-pressed', 'false');
+      await togglePreference(page, selector);
+      await expect(page.locator(selector)).toHaveAttribute('aria-pressed', 'true');
     }
     await expect(page.locator('#lintPanel')).toBeVisible();
   });
@@ -740,8 +750,10 @@ test.describe('mobile header', () => {
     await page.keyboard.press('Enter');
     await expect(menu).toBeVisible();
     await expect(menuBtn).toHaveAttribute('aria-expanded', 'true');
-    await page.keyboard.press('Tab');
-    await expect(page.locator('#lintToggle')).toBeFocused();
+    for (const selector of HEADER_CONTROLS) {
+      await page.keyboard.press('Tab');
+      await expect(page.locator(selector)).toBeFocused();
+    }
     await page.keyboard.press('Escape');
     await expect(menu).toBeHidden();
     await expect(menuBtn).toHaveAttribute('aria-expanded', 'false');

@@ -7,10 +7,8 @@ import './lib/fonts.js';
 import './styles.css';
 
 import { dom } from './lib/dom.js';
-import { STORAGE_KEYS } from './lib/constants.js';
-import { getStorageItem } from './lib/storage.js';
 import { bindPreviewLinkListeners, configureMarked, schedulePreviewUpdate } from './lib/preview.js';
-import { updateLineGutter, syncGutterScroll } from './lib/gutter.js';
+import { updateLineGutter, syncGutterScroll, resetGutterCache } from './lib/gutter.js';
 import { initTooltips } from './lib/tooltip.js';
 import {
   debouncedLint,
@@ -20,7 +18,9 @@ import {
   runInitialLint,
   toggleLint,
 } from './lib/lint.js';
-import { loadTheme, setTheme, toggleTheme } from './lib/theme.js';
+import { loadTheme, setTheme, getAppearancePreference } from './lib/theme.js';
+import { loadDisplayPreferences } from './lib/display-preferences.js';
+import { initSettings } from './lib/settings.js';
 import {
   bindResizeListeners,
   handleViewportResize,
@@ -38,23 +38,31 @@ import {
 } from './lib/layout.js';
 import {
   debouncedSave,
+  initDraftSafety,
   loadContent,
+  markContentDirty,
   normalizeEditorPosition,
   resetPaneScrollPositions,
   saveContent,
 } from './lib/content.js';
-import { bindImportExportListeners } from './lib/import-export.js';
+import { bindImportExportListeners, downloadMarkdown } from './lib/import-export.js';
 import { bindShortcuts } from './lib/shortcuts.js';
 import { bindHeaderMenuListeners } from './lib/header-menu.js';
 import { renderStaticIcons } from './lib/icons.js';
 import { initMediaViewer } from './lib/media-viewer.js';
 import { registerServiceWorker } from './lib/offline.js';
-import { loadRemoteImagePreference, toggleRemoteImageBlocking } from './lib/remote-images.js';
+import {
+  loadRemoteImagePreference,
+  resetRemoteImageAllowance,
+  toggleRemoteImageBlocking,
+} from './lib/remote-images.js';
+import { initDocumentNavigation } from './lib/document-navigation.js';
+import { initCompletion } from './lib/completion.js';
+import { initCitations } from './lib/citation-ui.js';
 
 const {
   editor,
   preview,
-  themeToggle,
   editorPane,
   collapseBtn,
   scrollSyncToggle,
@@ -74,8 +82,16 @@ function refreshGutter() {
   });
 }
 
+function replaceDocumentText(text) {
+  editor.value = text;
+  resetRemoteImageAllowance();
+  resetGutterCache();
+  editor.dispatchEvent(new Event('input', { bubbles: true }));
+}
+
 function setupEventListeners() {
   editor.addEventListener('input', () => {
+    markContentDirty();
     schedulePreviewUpdate();
     refreshGutter();
     debouncedSave();
@@ -96,8 +112,6 @@ function setupEventListeners() {
   bindHeaderMenuListeners();
   bindPreviewLinkListeners();
 
-  themeToggle.addEventListener('click', toggleTheme);
-
   if (collapseBtn) {
     collapseBtn.addEventListener('click', toggleCollapse);
   }
@@ -117,8 +131,8 @@ function setupEventListeners() {
   bindResizeListeners();
 
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-    if (!getStorageItem(STORAGE_KEYS.THEME)) {
-      setTheme(e.matches ? 'dark' : 'light');
+    if (getAppearancePreference() === 'system') {
+      setTheme(e.matches ? 'dark' : 'light', { persist: false });
     }
   });
 
@@ -162,7 +176,12 @@ function setupEventListeners() {
     }
   });
 
-  window.addEventListener('beforeunload', saveContent);
+  window.addEventListener('beforeunload', (event) => {
+    if (!saveContent()) {
+      event.preventDefault();
+      event.returnValue = '';
+    }
+  });
 }
 
 function init() {
@@ -171,6 +190,7 @@ function init() {
   initTooltips();
   configureMarked();
   loadTheme();
+  loadDisplayPreferences();
   loadCollapseState();
   loadEditorWidth();
   loadScrollSyncPreference();
@@ -181,7 +201,12 @@ function init() {
   resetPaneScrollPositions();
   normalizeEditorPosition();
   setupEventListeners();
+  initDraftSafety({ onReplace: replaceDocumentText, onDownload: downloadMarkdown });
+  initDocumentNavigation();
+  initCompletion();
+  initCitations();
   initMobileView();
+  initSettings();
   runInitialLint();
   registerServiceWorker();
 }

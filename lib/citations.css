@@ -1,0 +1,304 @@
+.prose a.citation-chip,
+.citation-chip {
+  display: inline-block;
+  max-width: 100%;
+  margin: 0.08em 0.12em;
+  padding: 0.08em 0.55em;
+  border: 1px solid var(--border-hover, #d4c9b5);
+  border-radius: 1em;
+  background: var(--bg-surface, #fffdf8);
+  color: var(--text-secondary, #6b6256);
+  font-family: var(--font-sans, sans-serif);
+  font-size: 0.8em;
+  font-weight: 400;
+  line-height: 1.5;
+  text-decoration: none;
+  vertical-align: baseline;
+  overflow-wrap: anywhere;
+}
+
+.prose a.citation-chip:hover {
+  border-color: var(--accent, #b25a37);
+  background: var(--bg-secondary, #f1ebe0);
+  color: var(--text-primary, #2c2722);
+  text-decoration: none;
+}
+
+.citation-chip:focus-visible {
+  outline: 2px solid var(--accent, #b25a37);
+  outline-offset: 3px;
+}
+
+.citation-missing {
+  border-style: dashed;
+}
+
+.citation-dialog {
+  width: min(68rem, calc(100% - 2rem));
+  max-width: 68rem;
+  max-height: calc(100dvh - 2rem);
+  overflow: auto;
+}
+
+.citation-dialog .export-dialog-actions {
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  margin: 0;
+  padding: 1rem 0;
+  background: var(--bg-surface);
+  border-top: 1px solid var(--border-color);
+}
+
+.citation-mode-actions,
+.citation-import-controls,
+.citation-playground-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.citation-mode-actions button,
+.citation-import-controls button,
+.citation-import-controls select,
+.citation-playground-actions button {
+  min-height: 2.5rem;
+  padding: 0.4rem 0.7rem;
+  border: 1px solid var(--border-hover);
+  border-radius: 0.35rem;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.citation-mode-actions button[aria-pressed='true'] {
+  background: var(--bg-secondary);
+  border-color: var(--accent);
+}
+
+.citation-dialog a,
+.citation-playground a {
+  color: var(--link-color);
+  overflow-wrap: anywhere;
+}
+
+.citation-add-fields {
+  display: grid;
+  gap: 0.9rem;
+  max-width: 34rem;
+}
+
+.citation-import-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.citation-input-column,
+.citation-output-column {
+  min-width: 0;
+}
+
+.citation-input-column > label,
+.citation-output-column > h3 {
+  display: block;
+  margin: 0 0 0.5rem;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 0.85rem;
+}
+
+.citation-input-column textarea {
+  display: block;
+  width: 100%;
+  min-height: 20rem;
+  padding: 1rem;
+  resize: vertical;
+  border: 1px solid var(--border-hover);
+  border-radius: 0.35rem;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font: 0.85rem / 1.65 var(--font-mono);
+  caret-color: var(--accent);
+}
+
+.citation-input-column textarea::placeholder {
+  color: var(--text-secondary);
+}
+
+.citation-import-preview {
+  min-height: 20rem;
+  max-height: 26rem;
+  padding: 1rem;
+  overflow: auto;
+  border: 1px solid var(--border-color);
+  border-radius: 0.35rem;
+  background: var(--bg-surface);
+  overflow-wrap: anywhere;
+}
+
+.citation-import-preview pre,
+.citation-import-preview table {
+  max-width: 100%;
+  overflow: auto;
+}
+
+.citation-import-status,
+.citation-source-review > p,
+.citation-source-review [data-role='sources'] {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+
+.citation-source-review {
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.citation-source-review summary {
+  cursor: pointer;
+  padding: 0.5rem 0;
+}
+
+.citation-manual-source {
+  margin-top: 1rem;
+}
+
+.citation-manual-source form {
+  padding-top: 0.75rem;
+  font-size: 0.85rem;
+}
+
+.citation-source-row {
+  display: grid;
+  grid-template-columns: 6rem minmax(6rem, 1fr) minmax(0, 2fr);
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.65rem 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.citation-source-row label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 2.5rem;
+}
+
+.citation-source-row input[type='text'] {
+  width: 100%;
+  min-width: 0;
+  padding: 0.6rem;
+  border: 1px solid var(--border-hover);
+  border-radius: 0.3rem;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font: inherit;
+}
+
+.citation-source-row a {
+  overflow-wrap: anywhere;
+}
+
+.citation-message {
+  margin: 0;
+  color: var(--alert-caution);
+  font-size: 0.85rem;
+}
+
+.citation-message:empty {
+  display: none;
+}
+
+.citation-dialog :is(button, input, select, textarea, summary, a):focus-visible,
+.citation-playground :is(button, input, select, textarea, summary, a):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.citation-dialog button:disabled,
+.citation-playground button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+body.citation-playground {
+  height: auto;
+  min-height: 100dvh;
+  overflow: auto;
+}
+
+.citation-playground-shell {
+  max-width: 78rem;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.citation-playground-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 1.5rem;
+  padding-bottom: 1.5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.citation-playground-header h1 {
+  margin: 0 0 0.5rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.7rem, 4vw, 2.4rem);
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.citation-playground-header p {
+  max-width: 58ch;
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.65;
+}
+
+.citation-playground-actions {
+  margin: 1.25rem 0;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+@media (max-width: 680px) {
+  .citation-import-columns {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .citation-source-row {
+    grid-template-columns: 6rem minmax(0, 1fr);
+  }
+  .citation-source-row a {
+    grid-column: 1 / -1;
+  }
+  .citation-input-column textarea,
+  .citation-import-preview {
+    min-height: 12rem;
+  }
+  .citation-playground-shell {
+    padding: 1rem;
+  }
+  .citation-playground-header {
+    flex-direction: column;
+  }
+}
+
+@media print {
+  .citation-chip {
+    break-inside: avoid;
+    background: white;
+    color: #333;
+    border-color: #aaa;
+  }
+}

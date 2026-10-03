@@ -42,8 +42,7 @@
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
 
-    <meta name="theme-color" content="#faf7f1" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#1b1916" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#faf7f1" />
 
     <script type="module" src="/app.js"></script>
     <script type="application/ld+json">
@@ -111,29 +110,6 @@
             </button>
           </nav>
           <button
-            class="scroll-sync-toggle"
-            id="scrollSyncToggle"
-            aria-label="Toggle scroll sync"
-            title="Sync scrolling (off)"
-            data-tooltip="Sync scrolling (off)"
-            aria-pressed="false"
-          >
-            <i
-              data-lucide="link"
-              class="sync-icon synced-icon"
-              width="18"
-              height="18"
-              aria-hidden="true"
-            ></i>
-            <i
-              data-lucide="unlink"
-              class="sync-icon unsynced-icon"
-              width="18"
-              height="18"
-              aria-hidden="true"
-            ></i>
-          </button>
-          <button
             type="button"
             class="header-menu-btn"
             id="headerMenuBtn"
@@ -144,50 +120,6 @@
             <i data-lucide="ellipsis" width="20" height="20" aria-hidden="true"></i>
           </button>
           <div class="header-menu" id="headerMenu">
-            <button
-              class="lint-toggle"
-              id="lintToggle"
-              aria-label="Toggle markdown linting"
-              title="Lint markdown (off)"
-              data-tooltip="Lint markdown (off)"
-              aria-pressed="false"
-            >
-              <i
-                data-lucide="triangle-alert"
-                class="lint-icon"
-                width="18"
-                height="18"
-                aria-hidden="true"
-              ></i>
-              <span class="header-menu-label">Markdown linting</span>
-              <span class="lint-count" id="lintCount" aria-live="polite"></span>
-              <span class="header-menu-switch" aria-hidden="true"></span>
-            </button>
-            <button
-              class="remote-images-toggle"
-              id="remoteImagesToggle"
-              aria-label="Block remote images"
-              title="Block remote images (off)"
-              data-tooltip="Block remote images (off)"
-              aria-pressed="false"
-            >
-              <i
-                data-lucide="image"
-                class="remote-images-icon remote-images-allowed-icon"
-                width="18"
-                height="18"
-                aria-hidden="true"
-              ></i>
-              <i
-                data-lucide="image-off"
-                class="remote-images-icon remote-images-blocked-icon"
-                width="18"
-                height="18"
-                aria-hidden="true"
-              ></i>
-              <span class="header-menu-label">Block remote images</span>
-              <span class="header-menu-switch" aria-hidden="true"></span>
-            </button>
             <div class="file-actions" role="group" aria-label="File actions">
               <button type="button" class="file-action-btn" id="importBtn">
                 <i
@@ -238,30 +170,15 @@
                 </div>
               </div>
             </div>
-            <button
-              class="theme-toggle"
-              id="themeToggle"
-              aria-label="Toggle theme"
-              title="Toggle theme"
-              data-tooltip="Toggle theme"
-            >
+            <button type="button" class="file-action-btn settings-trigger" id="settingsBtn">
               <i
-                data-lucide="sun"
-                class="theme-icon light-icon"
-                width="20"
-                height="20"
+                data-lucide="settings"
+                class="header-menu-icon"
+                width="18"
+                height="18"
                 aria-hidden="true"
               ></i>
-              <i
-                data-lucide="moon"
-                class="theme-icon dark-icon"
-                width="20"
-                height="20"
-                aria-hidden="true"
-              ></i>
-              <span class="header-menu-label">Theme</span>
-              <span class="header-menu-value theme-value-light">Light</span>
-              <span class="header-menu-value theme-value-dark">Dark</span>
+              Settings
             </button>
             <a
               class="repo-link"
@@ -317,7 +234,56 @@
               ></i>
             </button>
           </header>
+          <div class="document-toolbar" aria-label="Document tools">
+            <div class="save-indicator">
+              <span id="saveStatus" role="status" aria-live="polite">Starter document</span>
+              <button type="button" id="saveDownloadBtn" hidden>Download .md</button>
+            </div>
+            <div class="document-actions">
+              <button type="button" id="historyBtn" aria-haspopup="dialog">History</button>
+              <button
+                type="button"
+                id="outlineBtn"
+                aria-expanded="false"
+                aria-controls="documentOutline"
+              >
+                Outline
+              </button>
+              <button type="button" id="findBtn" aria-expanded="false" aria-controls="documentFind">
+                Find
+              </button>
+              <button type="button" id="completionBtn" aria-controls="completionMenu">
+                Complete
+              </button>
+              <button type="button" id="citationsBtn" aria-haspopup="dialog">Citations</button>
+            </div>
+          </div>
+          <div class="draft-conflict" id="draftConflict" role="alert" hidden>
+            <p id="draftConflictMessage"></p>
+            <div class="draft-conflict-actions">
+              <button type="button" id="keepLocalDraftBtn">Keep this version</button>
+              <button type="button" id="useOtherDraftBtn">Use other tab's version</button>
+              <button type="button" id="conflictDownloadBtn">Download mine</button>
+            </div>
+          </div>
+          <nav class="document-outline" id="documentOutline" aria-label="Document outline" hidden>
+            <ol id="outlineList"></ol>
+          </nav>
+          <div class="document-find" id="documentFind" role="search" hidden>
+            <label class="sr-only" for="findQuery">Find in Markdown</label>
+            <input id="findQuery" type="search" placeholder="Find in Markdown" autocomplete="off" />
+            <span id="findCount" aria-live="polite">0 matches</span>
+            <button type="button" id="findPreviousBtn" aria-label="Previous match">↑</button>
+            <button type="button" id="findNextBtn" aria-label="Next match">↓</button>
+            <label class="sr-only" for="replaceQuery">Replacement text</label>
+            <input id="replaceQuery" type="text" placeholder="Replace with" autocomplete="off" />
+            <button type="button" id="replaceOneBtn">Replace</button>
+            <button type="button" id="replaceAllBtn">Replace all</button>
+          </div>
           <div class="lint-panel" id="lintPanel" aria-live="polite" role="log">
+            <div class="lint-actions">
+              <button type="button" id="lintFixAll" hidden>Fix all safe issues</button>
+            </div>
             <ul class="lint-list" id="lintList"></ul>
           </div>
           <div class="field">
@@ -333,7 +299,14 @@
                 placeholder="Start writing..."
                 spellcheck="true"
                 aria-describedby="editorDescription"
+                aria-autocomplete="list"
+                aria-controls="completionOptions"
+                aria-expanded="false"
               ></textarea>
+              <div class="completion-menu" id="completionMenu" hidden>
+                <p>Suggestions <span>Enter to insert · Esc to close</span></p>
+                <div id="completionOptions" role="listbox" aria-label="Markdown suggestions"></div>
+              </div>
             </div>
           </div>
         </section>
@@ -362,6 +335,318 @@
         </section>
       </main>
     </div>
+
+    <div class="draft-alert" id="draftAlert" hidden>
+      <span id="draftAlertText"></span>
+      <button type="button" id="draftAlertOpenBtn">Review draft</button>
+    </div>
+
+    <main class="settings-page" id="settingsPage" hidden>
+      <aside class="settings-sidebar">
+        <a class="settings-brand" href="/">mdfor.dev <span>Settings</span></a>
+        <nav class="settings-nav" aria-label="Settings categories">
+          <a href="/?view=settings&amp;section=appearance" data-settings-section="appearance"
+            ><i data-lucide="paintbrush" width="19" height="19" aria-hidden="true"></i>Appearance</a
+          >
+          <a href="/?view=settings&amp;section=writing" data-settings-section="writing"
+            ><i data-lucide="pencil" width="19" height="19" aria-hidden="true"></i>Writing</a
+          >
+          <a href="/?view=settings&amp;section=privacy" data-settings-section="privacy"
+            ><i data-lucide="shield" width="19" height="19" aria-hidden="true"></i>Privacy</a
+          >
+        </nav>
+        <div class="settings-sidebar-footer">
+          <button type="button" class="settings-reset" id="settingsReset">Reset preferences</button>
+          <button type="button" class="settings-back" id="settingsBack">
+            <i data-lucide="chevron-left" width="18" height="18" aria-hidden="true"></i>Back to
+            editor
+          </button>
+        </div>
+      </aside>
+      <div class="settings-content" id="settingsContent">
+        <header class="settings-page-heading">
+          <p class="settings-eyebrow">Settings</p>
+          <h1 id="settingsTitle" tabindex="-1">Appearance</h1>
+          <p id="settingsDescription">Make this space feel like yours.</p>
+        </header>
+        <p class="settings-storage-status" id="settingsStorageStatus" role="status" hidden></p>
+        <section id="settingsAppearance" aria-labelledby="settingsTitle">
+          <div class="settings-section-heading">
+            <h2>Color scheme</h2>
+            <p>Follow your device, or choose your own light.</p>
+          </div>
+          <div class="scheme-options" role="group" aria-label="Color scheme">
+            <button
+              type="button"
+              class="scheme-card scheme-system"
+              data-appearance="system"
+              aria-pressed="true"
+            >
+              <span class="scheme-sketch" aria-hidden="true"
+                ><span></span><span></span><span></span></span
+              >System
+            </button>
+            <button
+              type="button"
+              class="scheme-card scheme-light"
+              data-appearance="light"
+              aria-pressed="false"
+            >
+              <span class="scheme-sketch" aria-hidden="true"
+                ><span></span><span></span><span></span></span
+              >Light
+            </button>
+            <button
+              type="button"
+              class="scheme-card scheme-dark"
+              data-appearance="dark"
+              aria-pressed="false"
+            >
+              <span class="scheme-sketch" aria-hidden="true"
+                ><span></span><span></span><span></span></span
+              >Dark
+            </button>
+          </div>
+          <div class="settings-section-heading settings-themes-heading">
+            <div>
+              <h2>Themes</h2>
+              <p>A pair of moods, for day and night.</p>
+            </div>
+            <button type="button" class="settings-button" id="themeCreateBtn">
+              <i data-lucide="paintbrush" width="17" height="17" aria-hidden="true"></i>Create theme
+            </button>
+          </div>
+          <div class="settings-themes" id="settingsThemes" role="group" aria-label="Themes"></div>
+          <div class="settings-section-heading">
+            <h2>Interface</h2>
+            <p>Display preferences stay on this website. Exports keep their standard styling.</p>
+          </div>
+          <div class="settings-fields" id="appearanceSliders"></div>
+          <div class="setting-row">
+            <div>
+              <h3>Contrast</h3>
+              <p>High contrast uses neutral colors. Your selected theme is remembered.</p>
+            </div>
+            <div class="settings-segmented" role="group" aria-label="Interface contrast">
+              <button type="button" data-contrast-choice="normal" aria-pressed="true">Normal</button
+              ><button type="button" data-contrast-choice="high" aria-pressed="false">High</button>
+            </div>
+          </div>
+        </section>
+        <section id="settingsWriting" aria-labelledby="settingsTitle" hidden>
+          <div class="settings-section-heading">
+            <h2>Text &amp; spacing</h2>
+            <p>Find your rhythm. These changes affect the website only.</p>
+          </div>
+          <div class="settings-fields" id="writingSliders"></div>
+          <div class="settings-section-heading">
+            <h2>Writing assistance</h2>
+            <p>Tools that help while you write.</p>
+          </div>
+          <div class="setting-row">
+            <div>
+              <h3>
+                Markdown linting
+                <span id="lintCount" class="settings-lint-count" aria-live="polite"></span>
+              </h3>
+              <p id="lintSettingDescription">Check your Markdown for common style issues.</p>
+            </div>
+            <button
+              type="button"
+              class="settings-switch"
+              id="lintToggle"
+              aria-label="Toggle markdown linting"
+              aria-describedby="lintSettingDescription"
+              aria-pressed="false"
+            ></button>
+          </div>
+          <div class="setting-row">
+            <div>
+              <h3>Automatic suggestions</h3>
+              <p id="suggestionSettingDescription">
+                Show local completions as you type. Complete stays available when this is off.
+              </p>
+            </div>
+            <button
+              type="button"
+              class="settings-switch"
+              id="autoCompletionToggle"
+              aria-label="Automatic suggestions"
+              aria-describedby="suggestionSettingDescription"
+              aria-pressed="true"
+            ></button>
+          </div>
+          <div class="setting-row">
+            <div>
+              <h3>Scroll sync</h3>
+              <p id="syncSettingDescription">
+                Keep the editor and preview scrolling together on desktop.
+              </p>
+            </div>
+            <button
+              type="button"
+              class="settings-switch"
+              id="scrollSyncToggle"
+              aria-label="Toggle scroll sync"
+              aria-describedby="syncSettingDescription"
+              aria-pressed="false"
+            ></button>
+          </div>
+        </section>
+        <section id="settingsPrivacy" aria-labelledby="settingsTitle" hidden>
+          <div class="settings-section-heading">
+            <h2>Remote content</h2>
+            <p>Your draft and preferences stay in this browser. No account is needed.</p>
+          </div>
+          <div class="setting-row">
+            <div>
+              <h3>Block remote images</h3>
+              <p id="imageSettingDescription">
+                Prevent images from other websites loading automatically, including image-loading
+                diagrams. External images contact their hosts when loaded. Choose Load images in the
+                preview to allow the currently blocked images; newly added sources stay blocked.
+                Images from this site and data URLs still load. Audio and video are unaffected.
+              </p>
+            </div>
+            <button
+              type="button"
+              class="settings-switch"
+              id="remoteImagesToggle"
+              aria-label="Block remote images"
+              aria-describedby="imageSettingDescription"
+              aria-pressed="false"
+            ></button>
+          </div>
+          <p class="settings-note">
+            Preferences and custom themes are saved on this device. Clearing your browser's site
+            data removes them.
+          </p>
+        </section>
+      </div>
+    </main>
+    <dialog class="theme-editor-dialog" id="themeEditorDialog" aria-labelledby="themeEditorTitle">
+      <form id="themeEditorForm" class="theme-editor-form">
+        <header class="theme-editor-heading">
+          <div>
+            <p class="settings-eyebrow">Your colors, your space</p>
+            <h2 id="themeEditorTitle">Create theme</h2>
+          </div>
+          <button type="button" class="settings-button" id="themeEditorCancel">Cancel</button>
+        </header>
+        <div class="theme-editor-body">
+          <div class="theme-editor-details">
+            <label for="customThemeName">Theme name</label
+            ><input
+              id="customThemeName"
+              type="text"
+              maxlength="60"
+              required
+              placeholder="e.g. Morning mist"
+              autocomplete="off"
+            /><label for="customThemeBase">Starting theme</label
+            ><select id="customThemeBase"></select>
+          </div>
+          <div class="theme-editor-mode">
+            <span>Appearance</span>
+            <div class="settings-segmented" role="group" aria-label="Editing appearance">
+              <button type="button" data-edit-mode="light" aria-pressed="true">Light</button
+              ><button type="button" data-edit-mode="dark" aria-pressed="false">Dark</button>
+            </div>
+          </div>
+          <div class="theme-editor-workspace">
+            <div class="theme-color-fields" id="customThemeColors"></div>
+            <div class="theme-preview-column">
+              <p class="settings-eyebrow">Live preview</p>
+              <div class="theme-preview" id="customThemePreview">
+                <div class="sample-toolbar" data-color-role="--bg-primary">
+                  <span>mdfor.dev</span
+                  ><span class="sample-accent" data-color-role="--accent">Export</span>
+                </div>
+                <div class="sample-panes">
+                  <div class="sample-editor" data-color-role="--bg-secondary">
+                    <p class="sample-muted" data-color-role="--text-secondary">MARKDOWN</p>
+                    <pre>
+# A quiet morning
+
+Room for **ideas**.
+
+&gt; Make it yours.</pre>
+                  </div>
+                  <div class="sample-reading" data-color-role="--bg-surface">
+                    <h3 data-color-role="--text-primary">A quiet morning</h3>
+                    <p>Room for <strong>ideas.</strong></p>
+                    <p class="sample-muted" data-color-role="--text-secondary">
+                      A softer place to write.
+                    </p>
+                    <p>
+                      <span class="sample-highlight" data-color-role="--highlight-bg"
+                        >Make it yours.</span
+                      >
+                    </p>
+                    <span class="sample-link" data-color-role="--accent"
+                      >Keep exploring &rarr;</span
+                    >
+                  </div>
+                </div>
+                <div class="sample-border" data-color-role="--border-color"></div>
+              </div>
+              <p
+                class="theme-contrast-warnings"
+                id="customThemeWarnings"
+                role="status"
+                aria-live="polite"
+              ></p>
+              <p class="settings-note">
+                Preview colors stay here until you save. High contrast doesn't change these
+                previews.
+              </p>
+            </div>
+          </div>
+        </div>
+        <footer class="theme-editor-footer">
+          <span>Saved locally · Website only</span
+          ><button
+            type="submit"
+            class="settings-button settings-button-primary"
+            id="themeEditorSubmit"
+          >
+            Create theme
+          </button>
+        </footer>
+      </form>
+    </dialog>
+    <dialog
+      class="settings-confirm-dialog"
+      id="settingsConfirmDialog"
+      aria-labelledby="settingsConfirmTitle"
+    >
+      <h2 id="settingsConfirmTitle">Discard changes?</h2>
+      <p id="settingsConfirmDescription"></p>
+      <div class="settings-confirm-actions">
+        <button type="button" class="settings-button" id="settingsConfirmCancel">
+          Keep editing</button
+        ><button
+          type="button"
+          class="settings-button settings-button-primary"
+          id="settingsConfirmAccept"
+        >
+          Discard
+        </button>
+      </div>
+    </dialog>
+
+    <dialog class="history-dialog" id="historyDialog" aria-labelledby="historyTitle">
+      <div class="history-dialog-content">
+        <header class="history-dialog-header">
+          <div>
+            <h2 id="historyTitle">Draft history</h2>
+            <p>Recovery versions are stored only in this browser.</p>
+          </div>
+          <button type="button" id="historyCloseBtn" aria-label="Close draft history">Close</button>
+        </header>
+        <ol id="historyList" class="history-list"></ol>
+      </div>
+    </dialog>
 
     <dialog class="export-dialog" id="importConfirmDialog" aria-labelledby="importConfirmTitle">
       <form method="dialog" class="export-dialog-form" id="importConfirmForm">
@@ -411,6 +696,84 @@
       <div class="media-viewer-stage" id="mediaViewerStage"></div>
     </dialog>
 
+    <dialog
+      class="export-dialog citation-dialog"
+      id="citationDialog"
+      aria-labelledby="citationDialogTitle"
+    >
+      <div class="export-dialog-form">
+        <header class="export-dialog-header">
+          <h2 class="export-dialog-title" id="citationDialogTitle">Citations</h2>
+          <p class="export-dialog-desc">
+            Add a source, or paste an AI response and review its source links.
+          </p>
+        </header>
+        <div class="citation-mode-actions">
+          <button type="button" data-citation-mode="add" aria-pressed="true">Add citation</button>
+          <button type="button" data-citation-mode="paste" aria-pressed="false">
+            Paste with citations
+          </button>
+          <a href="/citation-playground.html" target="_blank" rel="noopener noreferrer"
+            >Open standalone tool</a
+          >
+        </div>
+        <div id="citationAddView">
+          <form id="citationForm" class="citation-add-fields">
+            <div class="export-dialog-field">
+              <label class="export-dialog-label" for="citationUrl">Source URL</label>
+              <input
+                class="export-dialog-input"
+                id="citationUrl"
+                type="url"
+                required
+                placeholder="https://…"
+                autocomplete="off"
+              />
+            </div>
+            <div class="export-dialog-field">
+              <label class="export-dialog-label" for="citationLabel">Source label (optional)</label>
+              <input
+                class="export-dialog-input"
+                id="citationLabel"
+                type="text"
+                placeholder="eScholarship, nyu, or a source name"
+                autocomplete="off"
+              />
+            </div>
+            <div class="export-dialog-field">
+              <label class="export-dialog-label" for="citationTitle"
+                >Article title (optional)</label
+              >
+              <input
+                class="export-dialog-input"
+                id="citationTitle"
+                type="text"
+                autocomplete="off"
+              />
+            </div>
+          </form>
+        </div>
+        <div id="citationPasteView" hidden></div>
+        <p id="citationMessage" class="citation-message" role="status" aria-live="polite"></p>
+        <footer class="export-dialog-actions">
+          <button
+            class="export-dialog-btn export-dialog-btn-secondary"
+            id="citationCancel"
+            type="button"
+          >
+            Cancel
+          </button>
+          <button
+            class="export-dialog-btn export-dialog-btn-primary"
+            id="citationInsert"
+            type="button"
+          >
+            Insert citation
+          </button>
+        </footer>
+      </div>
+    </dialog>
+
     <dialog class="export-dialog" id="exportDialog" aria-labelledby="exportDialogTitle">
       <form method="dialog" class="export-dialog-form" id="exportDialogForm">
         <header class="export-dialog-header">
@@ -433,9 +796,9 @@
         </div>
 
         <div class="export-dialog-field">
-          <label class="export-dialog-label" for="exportTheme">Theme</label>
+          <label class="export-dialog-label" for="exportTheme">Appearance</label>
           <select id="exportTheme" class="export-dialog-select">
-            <option value="current" selected>Current theme</option>
+            <option value="current" selected>Current light/dark mode</option>
             <option value="light">Light</option>
             <option value="dark">Dark</option>
           </select>

@@ -45,6 +45,9 @@ self.addEventListener('fetch', (event) => {
 
   if (request.mode === 'navigate') {
     if (url.pathname === SHELL) event.respondWith(shellResponse(request));
+    else if (known.has(url.pathname) && url.pathname.endsWith('.html')) {
+      event.respondWith(assetResponse(event, request));
+    }
   } else if (known.has(url.pathname)) {
     event.respondWith(assetResponse(event, request));
   }

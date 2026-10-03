@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import { cpSync, existsSync } from 'fs';
 import { join } from 'path';
+import { fileURLToPath } from 'url';
 import { cloudflareHeaders } from './scripts/cloudflare-headers.js';
 import { serviceWorker } from './scripts/service-worker.js';
 
@@ -20,11 +21,31 @@ const STATIC_FILES = [
 ];
 
 export default defineConfig({
+  resolve: {
+    alias: [
+      {
+        find: './resolve-module.cjs',
+        replacement: fileURLToPath(
+          new URL('./lib/markdownlint-browser-resolve.js', import.meta.url)
+        ),
+      },
+      {
+        find: 'decode-named-character-reference',
+        replacement: fileURLToPath(
+          new URL('./node_modules/decode-named-character-reference/index.js', import.meta.url)
+        ),
+      },
+    ],
+  },
   build: {
     outDir: 'dist',
     // Mermaid's shared parser chunk is ~660 KB but lazy-loaded only for diagram blocks
     chunkSizeWarningLimit: 700,
     rollupOptions: {
+      input: {
+        main: fileURLToPath(new URL('./index.html', import.meta.url)),
+        citations: fileURLToPath(new URL('./citation-playground.html', import.meta.url)),
+      },
       output: {
         entryFileNames: 'app.[hash].js',
         chunkFileNames: 'chunks/[name].[hash].js',
